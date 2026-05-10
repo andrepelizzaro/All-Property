@@ -15,38 +15,31 @@ const Login = ({ onLogin }) => {
     const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
     
     try {
-      // 1. Tenta buscar todos os usuários (método mais resiliente)
-      const { data: allUsers, error } = await supabase
-        .from('crm_users')
-        .select('email, password');
+      // 1. Tenta buscar todos os usuários
+      const { data: allUsers } = await supabase.from('crm_users').select('email, password');
 
-      if (error) {
-        console.error('ERRO DE BANCO (SELECT):', error);
-      }
-
-      // Procura o usuário na lista retornada
+      // Procura o usuário na lista
       const dbUser = allUsers?.find(u => u.email.trim().toLowerCase() === cleanEmail);
 
+      // Se achou no banco e a senha bate (prioridade)
       if (dbUser && dbUser.password === password) {
         onLogin(cleanEmail);
         return;
       }
 
-      // 2. Se não bateu no banco, tenta a senha mestre '2026'
-      if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
-        onLogin(cleanEmail);
-        return;
-      }
-
-      // 3. Se chegou aqui, os dados estão realmente errados
-      alert('E-mail ou senha incorretos.');
-
-    } catch (err) {
-      console.error('ERRO CRÍTICO:', err);
+      // 2. Se não achou ou a senha não bate, testa a senha mestre '2026'
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
-        alert('Erro de conexão. Tente novamente.');
+        alert('E-mail ou senha incorretos.');
+      }
+
+    } catch (err) {
+      // Emergência: Se o banco falhar, usa o fixo
+      if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
+        onLogin(cleanEmail);
+      } else {
+        alert('Erro de conexão. Verifique sua internet.');
       }
     } finally {
       setLoading(false);
@@ -56,25 +49,16 @@ const Login = ({ onLogin }) => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
-    const newPass = prompt('Digite sua NOVA senha personalizada:');
-    if (!newPass || newPass.length < 4) return alert('A senha deve ter pelo menos 4 caracteres.');
+    const newPass = prompt('Digite sua NOVA senha (mínimo 4 dígitos):');
+    if (!newPass || newPass.length < 4) return alert('Senha inválida.');
     
     setLoading(true);
     try {
-      // Usa UPSERT para garantir que o registro exista ou seja atualizado
-      const { error } = await supabase
-        .from('crm_users')
-        .upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
-
-      if (error) {
-        console.error('Erro ao salvar senha:', error);
-        alert('Não foi possível salvar a nova senha no banco de dados.');
-      } else {
-        alert('Senha alterada com sucesso! Use-a no seu próximo acesso.');
-        setPassword(newPass);
-      }
+      await supabase.from('crm_users').upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
+      alert('Senha alterada! Use-a no próximo login.');
+      setPassword(newPass);
     } catch (err) {
-      alert('Erro de conexão ao tentar alterar a senha.');
+      alert('Erro ao salvar. Tente novamente.');
     } finally {
       setLoading(false);
     }

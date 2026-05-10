@@ -57,40 +57,35 @@ const Layout = ({ children, onLogout }) => {
 
         <div className="sidebar-footer">
           <button className="nav-item" onClick={async () => {
-            const email = localStorage.getItem('userEmail');
-            if (!email) return alert('Sessão inválida. Faça login novamente.');
-            
-            const currentPass = prompt('Para sua segurança, digite sua SENHA ATUAL:');
+            // Se o e-mail não estiver na memória, pede ele uma vez
+            let email = localStorage.getItem('userEmail');
+            if (!email) {
+              email = prompt('Por favor, confirme seu E-MAIL profissional:');
+              if (email) localStorage.setItem('userEmail', email.trim().toLowerCase());
+            }
+            if (!email) return;
+
+            const currentPass = prompt('Digite sua SENHA ATUAL:');
             if (!currentPass) return;
             
-            const newPass = prompt('Agora digite sua NOVA senha:');
-            if (!newPass || newPass.length < 4) return alert('A senha deve ter pelo menos 4 caracteres.');
+            const newPass = prompt('Digite sua NOVA senha:');
+            if (!newPass || newPass.length < 4) return alert('Senha muito curta.');
 
             try {
-              // 1. Primeiro verifica se a senha atual está correta (no banco ou a mestre 2026)
-              const { data: user } = await supabase
-                .from('crm_users')
-                .select('password')
-                .eq('email', email)
-                .maybeSingle();
+              // Busca a senha atual no banco
+              const { data: user } = await supabase.from('crm_users').select('password').eq('email', email.trim().toLowerCase()).maybeSingle();
               
-              const isDefaultPass = currentPass === '2026';
-              const matchesDbPass = user && user.password === currentPass;
+              const isDefault = currentPass === '2026';
+              const isCorrectDb = user && user.password === currentPass;
 
-              if (isDefaultPass || matchesDbPass) {
-                // 2. Se a senha atual é válida, grava a nova usando UPSERT
-                const { error } = await supabase
-                  .from('crm_users')
-                  .upsert({ email, password: newPass }, { onConflict: 'email' });
-
-                if (error) throw error;
-                alert('Senha alterada com sucesso! Use a nova senha no próximo acesso.');
+              if (isDefault || isCorrectDb) {
+                await supabase.from('crm_users').upsert({ email: email.trim().toLowerCase(), password: newPass }, { onConflict: 'email' });
+                alert('Senha alterada com sucesso!');
               } else {
-                alert('A senha atual digitada está incorreta.');
+                alert('A senha atual digitada não confere.');
               }
             } catch (err) {
-              console.error('Erro ao trocar senha:', err);
-              alert('Erro de conexão ao tentar alterar a senha.');
+              alert('Erro ao conectar com o banco. Tente novamente.');
             }
           }}>
             <span className="nav-icon"><Key size={20} /></span>
