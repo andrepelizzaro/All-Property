@@ -64,22 +64,33 @@ const Layout = ({ children, onLogout }) => {
             if (!currentPass) return;
             
             const newPass = prompt('Agora digite sua NOVA senha:');
-            if (!newPass) return;
+            if (!newPass || newPass.length < 4) return alert('A senha deve ter pelo menos 4 caracteres.');
 
             try {
-              const { error } = await supabase
+              // 1. Primeiro verifica se a senha atual está correta (no banco ou a mestre 2026)
+              const { data: user } = await supabase
                 .from('crm_users')
-                .update({ password: newPass })
+                .select('password')
                 .eq('email', email)
-                .eq('password', currentPass);
+                .maybeSingle();
+              
+              const isDefaultPass = currentPass === '2026';
+              const matchesDbPass = user && user.password === currentPass;
 
-              if (error) {
-                alert('Não foi possível alterar a senha. Verifique se a senha atual está correta.');
+              if (isDefaultPass || matchesDbPass) {
+                // 2. Se a senha atual é válida, grava a nova usando UPSERT
+                const { error } = await supabase
+                  .from('crm_users')
+                  .upsert({ email, password: newPass }, { onConflict: 'email' });
+
+                if (error) throw error;
+                alert('Senha alterada com sucesso! Use a nova senha no próximo acesso.');
               } else {
-                alert('Senha alterada com sucesso!');
+                alert('A senha atual digitada está incorreta.');
               }
             } catch (err) {
-              alert('Erro ao conectar ao servidor.');
+              console.error('Erro ao trocar senha:', err);
+              alert('Erro de conexão ao tentar alterar a senha.');
             }
           }}>
             <span className="nav-icon"><Key size={20} /></span>
