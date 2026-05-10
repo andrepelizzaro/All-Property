@@ -42,18 +42,20 @@ const Properties = () => {
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const data = { ...formData, price: Number(formData.price), bedrooms: Number(formData.bedrooms), area: Number(formData.area) };
     if (editingProperty) {
-      setProperties(prev => prev.map(p => p.id === editingProperty.id ? { ...data, id: editingProperty.id } : p));
+      await updateProperty(editingProperty.id, data);
     } else {
-      setProperties(prev => [...prev, { ...data, id: Date.now() }]);
+      await addProperty(data);
     }
     setShowModal(false);
   };
 
-  const handleDelete = (id) => {
-    setProperties(prev => prev.filter(p => p.id !== id));
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja excluir este imóvel?')) {
+      await deleteProperty(id);
+    }
   };
 
   const statusClass = (status) => {

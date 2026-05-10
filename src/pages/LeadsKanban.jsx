@@ -81,13 +81,13 @@ const LeadsKanban = () => {
     setShowModal(true);
   };
 
-  const handleSaveLead = () => {
+  const handleSaveLead = async () => {
     if (!formData.name.trim()) return;
     const { stageId, ...leadData } = formData;
     if (editingLeadId) {
-      updateLead(editingLeadId, leadData, stageId);
+      await updateLead(editingLeadId, leadData, stageId);
     } else {
-      addLead(leadData, stageId);
+      await addLead(leadData, stageId);
     }
     setShowModal(false);
   };

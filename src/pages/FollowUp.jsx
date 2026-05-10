@@ -52,41 +52,41 @@ const FollowUp = () => {
     setShowModal(true);
   };
 
-  const handleSaveLead = () => {
+  const handleSaveLead = async () => {
     if (!formData.name.trim()) return;
     if (editingLeadId) {
-      updateLead(editingLeadId, formData);
+      await updateLead(editingLeadId, formData);
     } else {
-      const id = addLead({ ...formData, inFollowUp: true });
-      setSelectedLeadId(id);
+      const id = await addLead({ ...formData, inFollowUp: true });
+      if (id) setSelectedLeadId(id);
     }
     setShowModal(false);
     setEditingLeadId(null);
   };
 
-  const handleDeleteLead = (id) => {
+  const handleDeleteLead = async (id) => {
     if (selectedLeadId === id) {
       const remaining = followUpLeads.filter(l => l.id !== id);
       setSelectedLeadId(remaining.length > 0 ? remaining[0].id : null);
     }
-    deleteLead(id);
+    await deleteLead(id);
     setShowDeleteConfirm(null);
   };
 
-  const handleRemoveFromFollowUp = (id) => {
+  const handleRemoveFromFollowUp = async (id) => {
     if (selectedLeadId === id) {
       const remaining = followUpLeads.filter(l => l.id !== id);
       setSelectedLeadId(remaining.length > 0 ? remaining[0].id : null);
     }
-    removeFromFollowUp(id);
+    await removeFromFollowUp(id);
   };
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (!noteText.trim() || !selectedLead) return;
     const currentNotes = selectedLead.notes || '';
     const timestamp = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     const newNote = `[${timestamp}] ${noteText}`;
-    updateLead(selectedLeadId, { notes: currentNotes ? `${newNote}\n${currentNotes}` : newNote });
+    await updateLead(selectedLeadId, { notes: currentNotes ? `${newNote}\n${currentNotes}` : newNote });
     setNoteText('');
     setShowNoteInput(false);
   };
