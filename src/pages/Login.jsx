@@ -15,19 +15,19 @@ const Login = ({ onLogin }) => {
     const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
     
     try {
-      // 1. Tenta buscar no banco de dados
-      const { data: user, error } = await supabase
+      // 1. Tenta buscar todos os usuários (método mais resiliente)
+      const { data: allUsers, error } = await supabase
         .from('crm_users')
-        .select('password')
-        .eq('email', cleanEmail)
-        .maybeSingle();
+        .select('email, password');
 
       if (error) {
-        console.error('Erro ao ler banco de dados:', error);
+        console.error('ERRO DE BANCO (SELECT):', error);
       }
 
-      // Se encontrou o usuário no banco e a senha bate
-      if (user && user.password === password) {
+      // Procura o usuário na lista retornada
+      const dbUser = allUsers?.find(u => u.email.trim().toLowerCase() === cleanEmail);
+
+      if (dbUser && dbUser.password === password) {
         onLogin(cleanEmail);
         return;
       }
@@ -42,7 +42,7 @@ const Login = ({ onLogin }) => {
       alert('E-mail ou senha incorretos.');
 
     } catch (err) {
-      // Emergência total
+      console.error('ERRO CRÍTICO:', err);
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
