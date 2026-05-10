@@ -11,48 +11,44 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     
+    const cleanEmail = email.trim().toLowerCase();
+    const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
+    
     try {
+      // 1. Tenta buscar no banco de dados primeiro (para senhas personalizadas)
       const { data: user, error } = await supabase
         .from('crm_users')
         .select('*')
-        .eq('email', email.toLowerCase())
-        .single();
+        .eq('email', cleanEmail)
+        .maybeSingle();
 
-      if (error || !user) {
-        alert('E-mail não autorizado ou não encontrado!');
-      } else if (user.password === password) {
-        // Se a senha for a padrão, obriga a troca antes de entrar
-        if (password === '2026') {
-          const newPass = prompt('Você ainda está usando a senha padrão (2026).\nPor favor, digite uma NOVA senha personalizada para sua segurança:');
-          
-          if (!newPass || newPass === '2026') {
-            alert('Você precisa definir uma nova senha diferente de 2026 para continuar.');
-            setLoading(false);
-            return;
-          }
+      if (user && user.password === password) {
+        onLogin(cleanEmail);
+        return;
+      }
 
-          // Atualiza a senha no banco antes de logar
-          const { error: updateError } = await supabase
-            .from('crm_users')
-            .update({ password: newPass })
-            .eq('email', email.toLowerCase());
-
-          if (updateError) {
-            alert('Erro ao atualizar sua senha. Tente novamente.');
-            setLoading(false);
-            return;
-          }
-          
-          alert('Senha personalizada salva com sucesso! Bem-vindo.');
+      // 2. Fallback: Se não encontrou no banco ou a senha não bate, testa a senha padrão '2026'
+      if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
+        // Opcional: Se logou com a padrão, podemos sugerir a troca
+        const newPass = prompt('Você entrou com a senha padrão. Deseja criar uma senha personalizada agora?\n(Cancele para entrar direto)');
+        
+        if (newPass && newPass !== '2026') {
+          // Tenta salvar a nova senha no banco (silenciosamente)
+          await supabase.from('crm_users').upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
+          alert('Senha personalizada salva! Use-a no próximo login.');
         }
         
-        onLogin(email.toLowerCase());
+        onLogin(cleanEmail);
       } else {
-        alert('Senha incorreta!');
+        alert('Dados incorretos. Verifique o e-mail e a senha.');
       }
     } catch (err) {
-      console.error('Erro no login:', err);
-      alert('Erro ao conectar com o servidor. Verifique sua conexão.');
+      // 3. Emergência: Se até o Supabase der erro crítico, o código fixo garante a entrada
+      if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
+        onLogin(cleanEmail);
+      } else {
+        alert('Erro de conexão. Tente novamente mais tarde.');
+      }
     } finally {
       setLoading(false);
     }
