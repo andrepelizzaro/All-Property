@@ -28,18 +28,18 @@ const Login = ({ onLogin }) => {
 
       const user = data && data[0];
 
+      // 1. Se o usuário existe no banco, valida EXCLUSIVAMENTE a senha dele
       if (user) {
         if (user.password === password) {
           onLogin(cleanEmail);
-          return;
-        } else if (password !== '2026') {
+        } else {
           alert('Senha incorreta.');
-          setLoading(false);
-          return;
         }
+        setLoading(false);
+        return;
       }
 
-      // 2. Fallback mestre (Sempre permite a 2026 para os e-mails autorizados)
+      // 2. Se NÃO existe no banco, permite a 2026 como primeiro acesso
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
