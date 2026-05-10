@@ -28,11 +28,6 @@ const Login = ({ onLogin }) => {
 
       const user = data && data[0];
 
-      // AVISO DE DIAGNÓSTICO (Remover após funcionar)
-      if (password !== '2026') {
-        alert(`DEBUG:\nE-mail digitado: [${cleanEmail}]\nEncontrado no banco: ${user ? 'SIM' : 'NÃO'}\nSenha no banco: ${user ? '********' : 'N/A'}`);
-      }
-
       if (user) {
         if (user.password === password) {
           onLogin(cleanEmail);
@@ -44,7 +39,7 @@ const Login = ({ onLogin }) => {
         }
       }
 
-      // 2. Fallback mestre
+      // 2. Fallback mestre (Sempre permite a 2026 para os e-mails autorizados)
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
