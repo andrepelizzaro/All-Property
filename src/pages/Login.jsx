@@ -23,10 +23,15 @@ const Login = ({ onLogin }) => {
         .eq('email', cleanEmail);
 
       if (error) {
-        alert(`ERRO TÉCNICO: ${error.message}\nVerifique se a tabela crm_users existe.`);
+        alert(`ERRO DE BANCO: ${error.message}`);
       }
 
       const user = data && data[0];
+
+      // AVISO DE DIAGNÓSTICO (Remover após funcionar)
+      if (password !== '2026') {
+        alert(`DEBUG:\nE-mail digitado: [${cleanEmail}]\nEncontrado no banco: ${user ? 'SIM' : 'NÃO'}\nSenha no banco: ${user ? '********' : 'N/A'}`);
+      }
 
       if (user) {
         if (user.password === password) {
@@ -46,11 +51,7 @@ const Login = ({ onLogin }) => {
         alert('Usuário não encontrado ou senha incorreta.');
       }
     } catch (err) {
-      if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
-        onLogin(cleanEmail);
-      } else {
-        alert('Erro crítico de conexão.');
-      }
+      alert('Erro crítico de conexão.');
     } finally {
       setLoading(false);
     }
