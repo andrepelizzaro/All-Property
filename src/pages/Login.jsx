@@ -16,25 +16,30 @@ const Login = ({ onLogin }) => {
     const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
     
     try {
-      // 1. Tenta validar no banco de dados DE FORMA DIRETA
-      const { data: user } = await supabase
+      // 1. Busca direta simplificada
+      const { data, error } = await supabase
         .from('crm_users')
         .select('password')
-        .eq('email', cleanEmail)
-        .maybeSingle();
+        .eq('email', cleanEmail);
+
+      if (error) {
+        alert(`ERRO TÉCNICO: ${error.message}\nVerifique se a tabela crm_users existe.`);
+      }
+
+      const user = data && data[0];
 
       if (user) {
         if (user.password === password) {
           onLogin(cleanEmail);
           return;
         } else if (password !== '2026') {
-          alert('Senha incorreta para este usuário.');
+          alert('Senha incorreta.');
           setLoading(false);
           return;
         }
       }
 
-      // 2. Se não achou no banco OU digitou a 2026, testa o fallback mestre
+      // 2. Fallback mestre
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
@@ -44,7 +49,7 @@ const Login = ({ onLogin }) => {
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
-        alert('Erro ao conectar com o servidor.');
+        alert('Erro crítico de conexão.');
       }
     } finally {
       setLoading(false);
