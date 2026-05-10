@@ -57,35 +57,31 @@ const Layout = ({ children, onLogout }) => {
 
         <div className="sidebar-footer">
           <button className="nav-item" onClick={async () => {
-            // Se o e-mail não estiver na memória, pede ele uma vez
             let email = localStorage.getItem('userEmail');
             if (!email) {
-              email = prompt('Por favor, confirme seu E-MAIL profissional:');
+              email = prompt('Confirme seu E-MAIL profissional:');
               if (email) localStorage.setItem('userEmail', email.trim().toLowerCase());
             }
             if (!email) return;
 
-            const currentPass = prompt('Digite sua SENHA ATUAL:');
+            const currentPass = prompt('Digite sua SENHA ATUAL (ou a padrão 2026):');
             if (!currentPass) return;
             
-            const newPass = prompt('Digite sua NOVA senha:');
+            const newPass = prompt('Digite sua NOVA SENHA:');
             if (!newPass || newPass.length < 4) return alert('Senha muito curta.');
 
             try {
-              // Busca a senha atual no banco
               const { data: user } = await supabase.from('crm_users').select('password').eq('email', email.trim().toLowerCase()).maybeSingle();
-              
-              const isDefault = currentPass === '2026';
-              const isCorrectDb = user && user.password === currentPass;
+              const isValid = (currentPass === '2026') || (user && user.password === currentPass);
 
-              if (isDefault || isCorrectDb) {
+              if (isValid) {
                 await supabase.from('crm_users').upsert({ email: email.trim().toLowerCase(), password: newPass }, { onConflict: 'email' });
-                alert('Senha alterada com sucesso!');
+                alert('SENHA ALTERADA COM SUCESSO!');
               } else {
-                alert('A senha atual digitada não confere.');
+                alert('A senha atual está incorreta.');
               }
             } catch (err) {
-              alert('Erro ao conectar com o banco. Tente novamente.');
+              alert('Erro ao conectar com o banco.');
             }
           }}>
             <span className="nav-icon"><Key size={20} /></span>

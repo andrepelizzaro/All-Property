@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Lock, ArrowRight, Settings } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import './Login.css';
+
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,31 +16,35 @@ const Login = ({ onLogin }) => {
     const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
     
     try {
-      // 1. Tenta buscar todos os usuários
-      const { data: allUsers } = await supabase.from('crm_users').select('email, password');
+      // 1. Tenta validar no banco de dados DE FORMA DIRETA
+      const { data: user } = await supabase
+        .from('crm_users')
+        .select('password')
+        .eq('email', cleanEmail)
+        .maybeSingle();
 
-      // Procura o usuário na lista
-      const dbUser = allUsers?.find(u => u.email.trim().toLowerCase() === cleanEmail);
-
-      // Se achou no banco e a senha bate (prioridade)
-      if (dbUser && dbUser.password === password) {
-        onLogin(cleanEmail);
-        return;
+      if (user) {
+        if (user.password === password) {
+          onLogin(cleanEmail);
+          return;
+        } else if (password !== '2026') {
+          alert('Senha incorreta para este usuário.');
+          setLoading(false);
+          return;
+        }
       }
 
-      // 2. Se não achou ou a senha não bate, testa a senha mestre '2026'
+      // 2. Se não achou no banco OU digitou a 2026, testa o fallback mestre
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
-        alert('E-mail ou senha incorretos.');
+        alert('Usuário não encontrado ou senha incorreta.');
       }
-
     } catch (err) {
-      // Emergência: Se o banco falhar, usa o fixo
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
-        alert('Erro de conexão. Verifique sua internet.');
+        alert('Erro ao conectar com o servidor.');
       }
     } finally {
       setLoading(false);
@@ -49,16 +54,22 @@ const Login = ({ onLogin }) => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
-    const newPass = prompt('Digite sua NOVA senha (mínimo 4 dígitos):');
-    if (!newPass || newPass.length < 4) return alert('Senha inválida.');
+    if (!cleanEmail) return alert('Digite seu e-mail antes de alterar a senha.');
+    
+    const newPass = prompt('Defina sua NOVA SENHA personalizada:');
+    if (!newPass || newPass.length < 4) return alert('A senha precisa ter ao menos 4 caracteres.');
     
     setLoading(true);
     try {
-      await supabase.from('crm_users').upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
-      alert('Senha alterada! Use-a no próximo login.');
+      const { error } = await supabase
+        .from('crm_users')
+        .upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
+
+      if (error) throw error;
+      alert('SUCESSO! Senha alterada.\nUse esta nova senha no próximo login.');
       setPassword(newPass);
     } catch (err) {
-      alert('Erro ao salvar. Tente novamente.');
+      alert('Erro ao salvar no banco.');
     } finally {
       setLoading(false);
     }
