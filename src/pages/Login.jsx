@@ -21,6 +21,31 @@ const Login = ({ onLogin }) => {
       if (error || !user) {
         alert('E-mail não autorizado ou não encontrado!');
       } else if (user.password === password) {
+        // Se a senha for a padrão, obriga a troca antes de entrar
+        if (password === '2026') {
+          const newPass = prompt('Você ainda está usando a senha padrão (2026).\nPor favor, digite uma NOVA senha personalizada para sua segurança:');
+          
+          if (!newPass || newPass === '2026') {
+            alert('Você precisa definir uma nova senha diferente de 2026 para continuar.');
+            setLoading(false);
+            return;
+          }
+
+          // Atualiza a senha no banco antes de logar
+          const { error: updateError } = await supabase
+            .from('crm_users')
+            .update({ password: newPass })
+            .eq('email', email.toLowerCase());
+
+          if (updateError) {
+            alert('Erro ao atualizar sua senha. Tente novamente.');
+            setLoading(false);
+            return;
+          }
+          
+          alert('Senha personalizada salva com sucesso! Bem-vindo.');
+        }
+        
         onLogin(email.toLowerCase());
       } else {
         alert('Senha incorreta!');
