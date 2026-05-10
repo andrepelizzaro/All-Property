@@ -53,8 +53,10 @@ const Properties = () => {
   };
 
   const handleDelete = async (id) => {
+    console.log('Solicitando exclusão do imóvel:', id);
     if (window.confirm('Tem certeza que deseja excluir este imóvel?')) {
       await deleteProperty(id);
+      console.log('Exclusão concluída');
     }
   };
 

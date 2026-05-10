@@ -16,8 +16,7 @@ export const PropertiesProvider = ({ children }) => {
   const fetchProperties = async () => {
     const { data, error } = await supabase
       .from('properties')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
 
     if (error) {
       console.error('Erro ao buscar imóveis:', error);
@@ -44,34 +43,54 @@ export const PropertiesProvider = ({ children }) => {
   }, []);
 
   const addProperty = async (data) => {
+    console.log('Iniciando cadastro de imóvel:', data);
     const { data: newProp, error } = await supabase
       .from('properties')
       .insert([data])
       .select();
 
     if (error) {
-      console.error('Erro ao adicionar imóvel:', error);
+      console.error('ERRO CRÍTICO SUPABASE (Add Property):', error);
       return null;
     }
-    return newProp[0].id;
+    
+    console.log('Imóvel cadastrado com sucesso no DB:', newProp);
+    await fetchProperties();
+    return newProp[0]?.id;
   };
 
   const updateProperty = async (id, updates) => {
+    console.log('Atualizando imóvel:', id, updates);
     const { error } = await supabase
       .from('properties')
       .update(updates)
       .eq('id', id);
 
-    if (error) console.error('Erro ao atualizar imóvel:', error);
+    if (error) {
+      console.error('ERRO CRÍTICO SUPABASE (Update Property):', error);
+    } else {
+      console.log('Imóvel atualizado com sucesso no DB');
+      await fetchProperties();
+    }
   };
 
   const deleteProperty = async (id) => {
+    console.log('Iniciando exclusão otimista:', id);
+    const originalProperties = [...properties];
+    setProperties(prev => prev.filter(p => p.id !== id));
+
     const { error } = await supabase
       .from('properties')
       .delete()
       .eq('id', id);
 
-    if (error) console.error('Erro ao excluir imóvel:', error);
+    if (error) {
+      console.error('ERRO CRÍTICO SUPABASE (Delete Property):', error);
+      setProperties(originalProperties);
+    } else {
+      console.log('Imóvel excluído com sucesso do DB');
+      await fetchProperties();
+    }
   };
 
   return (

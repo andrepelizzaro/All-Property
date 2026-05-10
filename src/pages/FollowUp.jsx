@@ -373,8 +373,53 @@ const FollowUp = () => {
                 <input className="input-field" value={formData.scheduledAction || ''} onChange={(e) => setFormData({...formData, scheduledAction: e.target.value})} placeholder="O que deve ser feito?" />
               </div>
               <div className="form-group">
-                <label className="label">Observações</label>
-                <textarea className="input-field textarea" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} placeholder="Anotações..." rows={3} />
+                <label className="label">Histórico do Cliente</label>
+                <div className="history-display-modal-fu" style={{ 
+                  maxHeight: '120px', 
+                  overflowY: 'auto', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  border: '1px solid var(--border)',
+                  marginBottom: '12px',
+                  fontSize: '0.85rem'
+                }}>
+                  {formData.notes ? (
+                    formData.notes.split('\n').map((line, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'flex-start' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', marginTop: '6px', flexShrink: 0 }}></div>
+                        <span style={{ color: 'var(--text-secondary)' }}>{line}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>Sem histórico.</p>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                  <input 
+                    className="input-field" 
+                    id="new-note-modal-fu" 
+                    placeholder="Adicionar nova nota ao histórico..." 
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const val = e.target.value;
+                        if (!val.trim()) return;
+                        const timestamp = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                        const newNote = `[${timestamp}] ${val}`;
+                        setFormData({...formData, notes: formData.notes ? `${newNote}\n${formData.notes}` : newNote});
+                        e.target.value = '';
+                      }
+                    }} 
+                  />
+                  <button className="btn btn-primary btn-sm" onClick={() => {
+                    const el = document.getElementById('new-note-modal-fu');
+                    if (!el.value.trim()) return;
+                    const timestamp = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const newNote = `[${timestamp}] ${el.value}`;
+                    setFormData({...formData, notes: formData.notes ? `${newNote}\n${formData.notes}` : newNote});
+                    el.value = '';
+                  }}>Add</button>
+                </div>
               </div>
             </div>
             <div className="modal-footer">

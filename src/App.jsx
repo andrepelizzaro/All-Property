@@ -21,8 +21,9 @@ function App() {
     }
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = (email) => {
     localStorage.setItem('allPropertyAuth', 'true');
+    localStorage.setItem('userEmail', email);
     setIsAuthenticated(true);
   };
 
@@ -37,7 +38,7 @@ function App() {
         <LeadsProvider>
           <Routes>
             <Route path="/login" element={
-              isAuthenticated ? <Navigate to="/" /> : <Login onLogin={handleLogin} />
+              isAuthenticated ? <Navigate to="/" /> : <Login onLogin={(email) => handleLogin(email)} />
             } />
             
             <Route path="/*" element={

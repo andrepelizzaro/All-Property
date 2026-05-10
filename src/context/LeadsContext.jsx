@@ -28,8 +28,7 @@ export const LeadsProvider = ({ children }) => {
   const syncFromSupabase = async () => {
     const { data, error } = await supabase
       .from('leads')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
 
     if (error) {
       console.error('Erro ao buscar leads:', error);
@@ -92,6 +91,17 @@ export const LeadsProvider = ({ children }) => {
 
   // ── Add lead ──
   const addLead = async (leadData, targetColumn = 'col-1') => {
+    console.log('Iniciando cadastro de lead:', leadData);
+    
+    // Otimista: Adicionar localmente antes do DB
+    const tempId = Date.now().toString();
+    const newLead = { id: tempId, ...leadData, date: new Date().toLocaleDateString('pt-BR') };
+    setLeads(prev => ({ ...prev, [tempId]: newLead }));
+    setColumns(prev => ({
+        ...prev,
+        [targetColumn]: { ...prev[targetColumn], leadIds: [...prev[targetColumn].leadIds, tempId] }
+    }));
+
     const { data, error } = await supabase
       .from('leads')
       .insert([{
@@ -111,14 +121,23 @@ export const LeadsProvider = ({ children }) => {
       .select();
 
     if (error) {
-      console.error('Erro ao adicionar lead:', error);
+      console.error('ERRO CRÍTICO SUPABASE (Add Lead):', error);
+      await syncFromSupabase(); // Reverte para estado real do banco
       return null;
     }
-    return data[0].id;
+    
+    await syncFromSupabase();
+    return data[0]?.id;
   };
 
   // ── Update lead ──
   const updateLead = async (id, updates, targetColumn = null) => {
+    console.log('Atualizando lead:', id, updates);
+    
+    // Otimista
+    const prevLeads = { ...leads };
+    setLeads(prev => ({ ...prev, [id]: { ...prev[id], ...updates } }));
+
     const payload = {};
     if (updates.name !== undefined) payload.name = updates.name;
     if (updates.phone !== undefined) payload.phone = updates.phone;
@@ -137,17 +156,40 @@ export const LeadsProvider = ({ children }) => {
       .update(payload)
       .eq('id', id);
 
-    if (error) console.error('Erro ao atualizar lead:', error);
+    if (error) {
+      console.error('ERRO CRÍTICO SUPABASE (Update Lead):', error);
+      setLeads(prevLeads); // Reverte em caso de erro
+    } else {
+      console.log('Lead atualizado com sucesso no DB');
+      await syncFromSupabase();
+    }
   };
 
   // ── Delete lead ──
   const deleteLead = async (id) => {
+    console.log('Iniciando exclusão otimista de lead:', id);
+    const originalLeads = { ...leads };
+    const originalColumns = { ...columns };
+    
+    setLeads(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+
     const { error } = await supabase
       .from('leads')
       .delete()
       .eq('id', id);
     
-    if (error) console.error('Erro ao excluir lead:', error);
+    if (error) {
+      console.error('ERRO CRÍTICO SUPABASE (Delete Lead):', error);
+      setLeads(originalLeads);
+      setColumns(originalColumns);
+    } else {
+      console.log('Lead excluído com sucesso do DB');
+      await syncFromSupabase();
+    }
   };
 
   // ── Follow-up helpers ──

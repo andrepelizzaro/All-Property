@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, MessageSquare, Home, Calendar as CalendarIcon, BarChart3, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FolderSync, Clock, Home, Calendar as CalendarIcon, BarChart3, LogOut, Menu, X, Key } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 import './Layout.css';
 
 const Layout = ({ children, onLogout }) => {
@@ -16,8 +17,8 @@ const Layout = ({ children, onLogout }) => {
 
   const navItems = [
     { path: '/', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { path: '/leads', name: 'Funil de Leads', icon: <Users size={20} /> },
-    { path: '/follow-up', name: 'Follow-Up', icon: <MessageSquare size={20} /> },
+    { path: '/leads', name: 'Funil de Leads', icon: <FolderSync size={20} /> },
+    { path: '/follow-up', name: 'Follow-Up', icon: <Clock size={20} /> },
     { path: '/properties', name: 'Imóveis', icon: <Home size={20} /> },
     { path: '/calendar', name: 'Agenda', icon: <CalendarIcon size={20} /> },
     { path: '/analytics', name: 'Analytics', icon: <BarChart3 size={20} /> },
@@ -55,6 +56,36 @@ const Layout = ({ children, onLogout }) => {
         </nav>
 
         <div className="sidebar-footer">
+          <button className="nav-item" onClick={async () => {
+            const email = localStorage.getItem('userEmail');
+            if (!email) return alert('Sessão inválida. Faça login novamente.');
+            
+            const currentPass = prompt('Para sua segurança, digite sua SENHA ATUAL:');
+            if (!currentPass) return;
+            
+            const newPass = prompt('Agora digite sua NOVA senha:');
+            if (!newPass) return;
+
+            try {
+              const { error } = await supabase
+                .from('crm_users')
+                .update({ password: newPass })
+                .eq('email', email)
+                .eq('password', currentPass);
+
+              if (error) {
+                alert('Não foi possível alterar a senha. Verifique se a senha atual está correta.');
+              } else {
+                alert('Senha alterada com sucesso!');
+              }
+            } catch (err) {
+              alert('Erro ao conectar ao servidor.');
+            }
+          }}>
+            <span className="nav-icon"><Key size={20} /></span>
+            <span className="nav-text">Alterar Senha</span>
+          </button>
+          
           <button className="nav-item text-danger" onClick={handleLogout}>
             <span className="nav-icon"><LogOut size={20} /></span>
             <span className="nav-text">Sair</span>

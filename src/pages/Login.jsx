@@ -1,29 +1,62 @@
 import { useState } from 'react';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Settings } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 import './Login.css';
-
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     
-    // Validate password and authorized emails
-    const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
-    
-    setTimeout(() => {
-      setLoading(false);
-      if (password === '2026' && authorizedEmails.includes(email.toLowerCase())) {
-        onLogin();
-      } else if (password !== '2026') {
-        alert('Senha incorreta!');
+    try {
+      const { data: user, error } = await supabase
+        .from('crm_users')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (error || !user) {
+        alert('E-mail não autorizado ou não encontrado!');
+      } else if (user.password === password) {
+        onLogin(email.toLowerCase());
       } else {
-        alert('E-mail não autorizado!');
+        alert('Senha incorreta!');
       }
-    }, 1000);
+    } catch (err) {
+      console.error('Erro no login:', err);
+      alert('Erro ao conectar com o servidor. Verifique sua conexão.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    const newPass = prompt('Digite sua NOVA senha:');
+    if (!newPass) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('crm_users')
+        .update({ password: newPass })
+        .eq('email', email.toLowerCase())
+        .eq('password', password); // Só altera se a senha atual estiver correta
+
+      if (error) {
+        alert('Não foi possível alterar a senha. Verifique se o e-mail e a senha atual estão corretos.');
+      } else {
+        alert('Senha alterada com sucesso!');
+        setPassword(newPass);
+      }
+    } catch (err) {
+      alert('Erro ao alterar senha.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,7 +92,7 @@ const Login = ({ onLogin }) => {
           <div className="form-group">
             <div className="label-flex">
               <label className="label">Senha</label>
-              <a href="#" className="forgot-password">Esqueceu a senha?</a>
+              <button type="button" onClick={handleChangePassword} className="forgot-password" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Alterar senha?</button>
             </div>
             <div className="input-with-icon">
               <Lock className="input-icon" size={20} />
