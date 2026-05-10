@@ -15,39 +15,38 @@ const Login = ({ onLogin }) => {
     const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com'];
     
     try {
-      // 1. Tenta buscar no banco de dados primeiro (para senhas personalizadas)
+      // 1. Tenta buscar no banco de dados
       const { data: user, error } = await supabase
         .from('crm_users')
-        .select('*')
+        .select('password')
         .eq('email', cleanEmail)
         .maybeSingle();
 
+      if (error) {
+        console.error('Erro ao ler banco de dados:', error);
+      }
+
+      // Se encontrou o usuário no banco e a senha bate
       if (user && user.password === password) {
         onLogin(cleanEmail);
         return;
       }
 
-      // 2. Fallback: Se não encontrou no banco ou a senha não bate, testa a senha padrão '2026'
+      // 2. Se não bateu no banco, tenta a senha mestre '2026'
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
-        // Opcional: Se logou com a padrão, podemos sugerir a troca
-        const newPass = prompt('Você entrou com a senha padrão. Deseja criar uma senha personalizada agora?\n(Cancele para entrar direto)');
-        
-        if (newPass && newPass !== '2026') {
-          // Tenta salvar a nova senha no banco (silenciosamente)
-          await supabase.from('crm_users').upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
-          alert('Senha personalizada salva! Use-a no próximo login.');
-        }
-        
         onLogin(cleanEmail);
-      } else {
-        alert('Dados incorretos. Verifique o e-mail e a senha.');
+        return;
       }
+
+      // 3. Se chegou aqui, os dados estão realmente errados
+      alert('E-mail ou senha incorretos.');
+
     } catch (err) {
-      // 3. Emergência: Se até o Supabase der erro crítico, o código fixo garante a entrada
+      // Emergência total
       if (password === '2026' && authorizedEmails.includes(cleanEmail)) {
         onLogin(cleanEmail);
       } else {
-        alert('Erro de conexão. Tente novamente mais tarde.');
+        alert('Erro de conexão. Tente novamente.');
       }
     } finally {
       setLoading(false);
@@ -56,25 +55,26 @@ const Login = ({ onLogin }) => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    const newPass = prompt('Digite sua NOVA senha:');
-    if (!newPass) return;
+    const cleanEmail = email.trim().toLowerCase();
+    const newPass = prompt('Digite sua NOVA senha personalizada:');
+    if (!newPass || newPass.length < 4) return alert('A senha deve ter pelo menos 4 caracteres.');
     
     setLoading(true);
     try {
+      // Usa UPSERT para garantir que o registro exista ou seja atualizado
       const { error } = await supabase
         .from('crm_users')
-        .update({ password: newPass })
-        .eq('email', email.toLowerCase())
-        .eq('password', password); // Só altera se a senha atual estiver correta
+        .upsert({ email: cleanEmail, password: newPass }, { onConflict: 'email' });
 
       if (error) {
-        alert('Não foi possível alterar a senha. Verifique se o e-mail e a senha atual estão corretos.');
+        console.error('Erro ao salvar senha:', error);
+        alert('Não foi possível salvar a nova senha no banco de dados.');
       } else {
-        alert('Senha alterada com sucesso!');
+        alert('Senha alterada com sucesso! Use-a no seu próximo acesso.');
         setPassword(newPass);
       }
     } catch (err) {
-      alert('Erro ao alterar senha.');
+      alert('Erro de conexão ao tentar alterar a senha.');
     } finally {
       setLoading(false);
     }
