@@ -153,6 +153,13 @@
   align-items: flex-start;
 }
 
+.lead-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .lead-card-actions {
   display: flex;
   gap: 4px;
@@ -296,6 +303,8 @@
 .badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
 .badge-primary { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.badge-broker { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 20px; text-transform: none; letter-spacing: 0; }
+
 
 /* Modal Styles - Professional CRM */
 .modal-overlay {

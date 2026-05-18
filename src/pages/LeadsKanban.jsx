@@ -31,6 +31,7 @@ const LeadsKanban = () => {
     source: 'WhatsApp',
     broker: 'Admin',
     priority: 'Média',
+    assignedTo: '',
     notes: '',
     stageId: 'col-1',
     scheduledDate: '',
@@ -50,6 +51,7 @@ const LeadsKanban = () => {
         source: lead.source || 'WhatsApp',
         broker: lead.broker || 'Admin',
         priority: lead.priority || 'Média',
+        assignedTo: lead.assignedTo || '',
         notes: lead.notes || '',
         stageId: Object.keys(columns).find(key => columns[key].leadIds.includes(editingLeadId)) || 'col-1',
         scheduledDate: lead.scheduledDate || '',
@@ -89,6 +91,7 @@ const LeadsKanban = () => {
       source: 'WhatsApp',
       broker: 'Admin',
       priority: 'Média',
+      assignedTo: '',
       notes: '',
       stageId: currentStageId,
       scheduledDate: '',
@@ -171,7 +174,14 @@ const LeadsKanban = () => {
             {currentLeads.map(lead => (
               <div key={lead.id} className="lead-card-premium">
                 <div className="lead-card-header">
-                  <PriorityBadge priority={lead.priority} />
+                  <div className="lead-card-badges">
+                    <PriorityBadge priority={lead.priority} />
+                    {lead.assignedTo && (
+                      <span className="badge badge-broker" title="Corretor Responsável">
+                        👤 {lead.assignedTo}
+                      </span>
+                    )}
+                  </div>
                   <div className="lead-card-actions">
                     <button onClick={() => { setEditingLeadId(lead.id); setShowModal(true); }} title="Editar">
                       <Edit3 size={16} />
@@ -273,6 +283,19 @@ const LeadsKanban = () => {
                     <option value="Alta">Alta</option>
                     <option value="Média">Média</option>
                     <option value="Baixa">Baixa</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Corretor Responsável</label>
+                  <select 
+                    value={formData.assignedTo}
+                    onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
+                  >
+                    <option value="">-- Sem responsável --</option>
+                    <option value="Araujo">Araujo</option>
+                    <option value="Jonata">Jonata</option>
+                    <option value="Jorge">Jorge</option>
                   </select>
                 </div>
 

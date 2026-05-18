@@ -56,6 +56,7 @@ export const LeadsProvider = ({ children }) => {
         source: lead.source,
         broker: lead.broker,
         priority: lead.priority,
+        assignedTo: lead.assigned_to || '',
         notes: lead.notes,
         inFollowUp: lead.in_follow_up,
         scheduledDate: lead.scheduled_date,
@@ -111,6 +112,7 @@ export const LeadsProvider = ({ children }) => {
         source: leadData.source || 'WhatsApp',
         broker: leadData.broker || 'Admin',
         priority: leadData.priority || 'Média',
+        assigned_to: leadData.assignedTo || null,
         notes: leadData.notes || '',
         stage_id: targetColumn,
         in_follow_up: leadData.inFollowUp || false,
@@ -144,6 +146,7 @@ export const LeadsProvider = ({ children }) => {
     if (updates.property !== undefined) payload.property = updates.property;
     if (updates.source !== undefined) payload.source = updates.source;
     if (updates.priority !== undefined) payload.priority = updates.priority;
+    if (updates.assignedTo !== undefined) payload.assigned_to = updates.assignedTo || null;
     if (updates.notes !== undefined) payload.notes = updates.notes;
     if (updates.inFollowUp !== undefined) payload.in_follow_up = updates.inFollowUp;
     if (updates.scheduledDate !== undefined) payload.scheduled_date = updates.scheduledDate;

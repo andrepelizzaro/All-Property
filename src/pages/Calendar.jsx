@@ -52,6 +52,7 @@ const CalendarPage = () => {
             action: l.scheduledAction || 'Ação',
             time: l.scheduledTime || '09:00',
             client: l.name,
+            assignedTo: l.assignedTo || '',
             type: 'visita',
             isLead: true
           };
@@ -305,6 +306,11 @@ const CalendarPage = () => {
                       <div className="event-meta">
                         <span><Clock size={13} /> {ev.time}</span>
                         <span><User size={13} /> {ev.client}</span>
+                        {ev.assignedTo && (
+                          <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                            👤 {ev.assignedTo}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -336,6 +342,11 @@ const CalendarPage = () => {
                       <div className="upcoming-info">
                         <span className="upcoming-title-text">{ev.title}</span>
                         <span className="upcoming-time">{ev.time} • {ev.action || eventTypeLabel(ev.type)}</span>
+                        {ev.assignedTo && (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600 }}>
+                            👤 {ev.assignedTo}
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))
