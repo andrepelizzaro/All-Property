@@ -13,6 +13,7 @@ import Analytics from './pages/Analytics';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState(() => localStorage.getItem('userEmail') || '');
 
   useEffect(() => {
     const auth = localStorage.getItem('allPropertyAuth');
@@ -24,18 +25,21 @@ function App() {
   const handleLogin = (email) => {
     localStorage.setItem('allPropertyAuth', 'true');
     localStorage.setItem('userEmail', email);
+    setUserEmail(email);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('allPropertyAuth');
+    localStorage.removeItem('userEmail');
+    setUserEmail('');
     setIsAuthenticated(false);
   };
 
   return (
     <Router>
       <PropertiesProvider>
-        <LeadsProvider>
+        <LeadsProvider userEmail={userEmail}>
           <Routes>
             <Route path="/login" element={
               isAuthenticated ? <Navigate to="/" /> : <Login onLogin={(email) => handleLogin(email)} />

@@ -11,7 +11,7 @@ export const useLeads = () => {
   return ctx;
 };
 
-export const LeadsProvider = ({ children }) => {
+export const LeadsProvider = ({ children, userEmail = '' }) => {
   const [leads, setLeads] = useState({});
   const [columns, setColumns] = useState({
     'col-1': { id: 'col-1', title: 'Novo Lead', leadIds: [] },
@@ -35,6 +35,9 @@ export const LeadsProvider = ({ children }) => {
       return;
     }
 
+    // Restrição de acesso: Jorge só vê as leads atribuídas a ele
+    const isJorge = userEmail.toLowerCase() === 'jorge@allproperty.com';
+
     const newLeads = {};
     const newColumns = {
       'col-1': { id: 'col-1', title: 'Novo Lead', leadIds: [] },
@@ -47,6 +50,9 @@ export const LeadsProvider = ({ children }) => {
     };
 
     data.forEach(lead => {
+      // Se for o Jorge, exibe apenas leads atribuídas a ele
+      if (isJorge && lead.assigned_to !== 'Jorge') return;
+
       const stage = lead.stage_id || 'col-1';
       newLeads[lead.id] = {
         id: lead.id,
@@ -75,7 +81,7 @@ export const LeadsProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    syncFromSupabase();
+    if (userEmail) syncFromSupabase();
 
     // Sincronização em Tempo Real
     const channel = supabase
@@ -88,7 +94,7 @@ export const LeadsProvider = ({ children }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [userEmail]);
 
   // ── Add lead ──
   const addLead = async (leadData, targetColumn = 'col-1') => {
