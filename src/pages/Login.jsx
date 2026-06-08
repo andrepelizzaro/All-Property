@@ -13,7 +13,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     
     const cleanEmail = email.trim().toLowerCase();
-    const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com', 'jorge@allproperty.com'];
+    const authorizedEmails = ['araujo@allproperty.com', 'andre@allproperty.com', 'jonata@allproperty.com', 'jorge@allproperty.com', 'gustavo@allproperty.com'];
     
     try {
       // 1. Busca direta simplificada

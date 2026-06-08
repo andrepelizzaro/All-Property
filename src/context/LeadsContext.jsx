@@ -35,8 +35,10 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
       return;
     }
 
-    // Restrição de acesso: Jorge só vê as leads atribuídas a ele
-    const isJorge = userEmail.toLowerCase() === 'jorge@allproperty.com';
+    // Restrição de acesso: Jorge e Gustavo só veem as leads atribuídas a eles
+    const cleanEmail = (userEmail || '').trim().toLowerCase();
+    const isJorge = cleanEmail === 'jorge@allproperty.com';
+    const isGustavo = cleanEmail === 'gustavo@allproperty.com';
 
     const newLeads = {};
     const newColumns = {
@@ -50,8 +52,9 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
     };
 
     data.forEach(lead => {
-      // Se for o Jorge, exibe apenas leads atribuídas a ele
+      // Se for o Jorge ou Gustavo, exibe apenas leads atribuídas a eles
       if (isJorge && lead.assigned_to !== 'Jorge') return;
+      if (isGustavo && lead.assigned_to !== 'Gustavo') return;
 
       const stage = lead.stage_id || 'col-1';
       newLeads[lead.id] = {

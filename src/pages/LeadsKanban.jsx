@@ -296,6 +296,7 @@ const LeadsKanban = () => {
                     <option value="Araujo">Araujo</option>
                     <option value="Jonata">Jonata</option>
                     <option value="Jorge">Jorge</option>
+                    <option value="Gustavo">Gustavo</option>
                   </select>
                 </div>
 
