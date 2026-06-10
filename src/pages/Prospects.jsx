@@ -36,6 +36,16 @@ const Prospects = ({ userEmail = '' }) => {
   const isGustavo = cleanEmail === 'gustavo@allproperty.com';
   const isRestricted = isJorge || isGustavo;
 
+  // Apenas Andre, Araujo e Jonata podem apagar leads
+  const canDelete = [
+    'andre@allproperty.com',
+    'araujo@allproperty.com',
+    'jonata@allproperty.com',
+  ].includes(cleanEmail);
+
+  // Apenas Araujo e Andre podem atribuir corretores
+  const canAssign = !isRestricted;
+
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
@@ -299,33 +309,25 @@ const Prospects = ({ userEmail = '' }) => {
                   </td>
 
                   <td className="actions-cell">
-                    {!isRestricted && (
-                      <button
-                        className="action-promote"
-                        onClick={() => handlePromote(lead.id)}
-                        disabled={promotingId === lead.id}
-                        title="Enviar para o Funil de Vendas"
-                      >
-                        <ArrowRightCircle size={15} />
-                        {promotingId === lead.id ? '...' : 'Funil'}
-                      </button>
-                    )}
-                    {!isRestricted && (
+                    {/* Todos os corretores podem enviar para o Funil */}
+                    <button
+                      className="action-promote"
+                      onClick={() => handlePromote(lead.id)}
+                      disabled={promotingId === lead.id}
+                      title="Enviar para o Funil de Vendas"
+                    >
+                      <ArrowRightCircle size={15} />
+                      {promotingId === lead.id ? '...' : 'Funil'}
+                    </button>
+
+                    {/* Apenas Andre, Araujo e Jonata podem excluir */}
+                    {canDelete && (
                       <button
                         className="action-delete"
                         onClick={() => setShowDeleteConfirm(lead.id)}
                         title="Excluir lead"
                       >
                         <Trash2 size={14} />
-                      </button>
-                    )}
-                    {isRestricted && (
-                      <button
-                        className="action-whatsapp"
-                        onClick={() => openWhatsApp(lead.phone)}
-                        title="Abrir WhatsApp"
-                      >
-                        <Phone size={14} /> Ligar
                       </button>
                     )}
                   </td>

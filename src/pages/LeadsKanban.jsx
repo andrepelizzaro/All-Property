@@ -23,6 +23,14 @@ const LeadsKanban = () => {
   const [editingLeadId, setEditingLeadId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Permissão de exclusão: apenas Andre, Araujo e Jonata
+  const currentUserEmail = (localStorage.getItem('userEmail') || '').trim().toLowerCase();
+  const canDelete = [
+    'andre@allproperty.com',
+    'araujo@allproperty.com',
+    'jonata@allproperty.com',
+  ].includes(currentUserEmail);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -186,9 +194,11 @@ const LeadsKanban = () => {
                     <button onClick={() => { setEditingLeadId(lead.id); setShowModal(true); }} title="Editar">
                       <Edit3 size={16} />
                     </button>
-                    <button onClick={() => setShowDeleteConfirm(lead.id)} title="Excluir" className="btn-delete-card">
-                      <Trash2 size={16} />
-                    </button>
+                    {canDelete && (
+                      <button onClick={() => setShowDeleteConfirm(lead.id)} title="Excluir" className="btn-delete-card">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
                 
