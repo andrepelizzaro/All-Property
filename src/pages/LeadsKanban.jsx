@@ -31,6 +31,17 @@ const LeadsKanban = () => {
     'araujo@allproperty.com',
     'jonata@allproperty.com',
   ].includes(currentUserEmail);
+
+  const isJorge = currentUserEmail === 'jorge@allproperty.com';
+  const isGustavo = currentUserEmail === 'gustavo@allproperty.com';
+  const isRestricted = isJorge || isGustavo;
+  const canAssign = !isRestricted;
+
+  const getDefaultAssignedTo = () => {
+    if (isJorge) return 'Jorge';
+    if (isGustavo) return 'Gustavo';
+    return '';
+  };
   
   const [formData, setFormData] = useState({
     name: '',
@@ -67,7 +78,11 @@ const LeadsKanban = () => {
         scheduledAction: lead.scheduledAction || ''
       });
     } else {
-      setFormData(prev => ({ ...prev, stageId: currentStageId }));
+      setFormData(prev => ({ 
+        ...prev, 
+        stageId: currentStageId,
+        assignedTo: prev.assignedTo || getDefaultAssignedTo()
+      }));
     }
   }, [editingLeadId, leads, currentStageId, columns]);
 
@@ -99,7 +114,7 @@ const LeadsKanban = () => {
       source: 'WhatsApp',
       broker: 'Admin',
       priority: 'Média',
-      assignedTo: '',
+      assignedTo: getDefaultAssignedTo(),
       notes: '',
       stageId: currentStageId,
       scheduledDate: '',
@@ -301,6 +316,7 @@ const LeadsKanban = () => {
                   <select 
                     value={formData.assignedTo}
                     onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
+                    disabled={!canAssign}
                   >
                     <option value="">-- Sem responsável --</option>
                     <option value="Araujo">Araujo</option>

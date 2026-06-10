@@ -107,9 +107,18 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
   const addLead = async (leadData, targetColumn = 'col-1') => {
     console.log('Iniciando cadastro de lead:', leadData);
     
+    const cleanEmail = (userEmail || '').trim().toLowerCase();
+    const isJorge = cleanEmail === 'jorge@allproperty.com';
+    const isGustavo = cleanEmail === 'gustavo@allproperty.com';
+    let assignedToVal = leadData.assignedTo;
+    if (isJorge) assignedToVal = 'Jorge';
+    else if (isGustavo) assignedToVal = 'Gustavo';
+
+    const leadWithAssignment = { ...leadData, assignedTo: assignedToVal };
+    
     // Otimista: Adicionar localmente antes do DB
     const tempId = Date.now().toString();
-    const newLead = { id: tempId, ...leadData, date: new Date().toLocaleDateString('pt-BR') };
+    const newLead = { id: tempId, ...leadWithAssignment, date: new Date().toLocaleDateString('pt-BR') };
     setLeads(prev => ({ ...prev, [tempId]: newLead }));
     setColumns(prev => ({
         ...prev,
@@ -119,19 +128,19 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
     const { data, error } = await supabase
       .from('leads')
       .insert([{
-        name: leadData.name,
-        phone: leadData.phone,
-        property: leadData.property,
-        source: leadData.source || 'WhatsApp',
-        broker: leadData.broker || 'Admin',
-        priority: leadData.priority || 'Média',
-        assigned_to: leadData.assignedTo || null,
-        notes: leadData.notes || '',
+        name: leadWithAssignment.name,
+        phone: leadWithAssignment.phone,
+        property: leadWithAssignment.property,
+        source: leadWithAssignment.source || 'WhatsApp',
+        broker: leadWithAssignment.broker || 'Admin',
+        priority: leadWithAssignment.priority || 'Média',
+        assigned_to: leadWithAssignment.assignedTo || null,
+        notes: leadWithAssignment.notes || '',
         stage_id: targetColumn,
-        in_follow_up: leadData.inFollowUp || false,
-        scheduled_date: leadData.scheduledDate,
-        scheduled_time: leadData.scheduledTime,
-        scheduled_action: leadData.scheduledAction
+        in_follow_up: leadWithAssignment.inFollowUp || false,
+        scheduled_date: leadWithAssignment.scheduledDate,
+        scheduled_time: leadWithAssignment.scheduledTime,
+        scheduled_action: leadWithAssignment.scheduledAction
       }])
       .select();
 
@@ -149,22 +158,30 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
   const updateLead = async (id, updates, targetColumn = null) => {
     console.log('Atualizando lead:', id, updates);
     
+    const cleanEmail = (userEmail || '').trim().toLowerCase();
+    const isJorge = cleanEmail === 'jorge@allproperty.com';
+    const isGustavo = cleanEmail === 'gustavo@allproperty.com';
+    
+    const updatedFields = { ...updates };
+    if (isJorge) updatedFields.assignedTo = 'Jorge';
+    else if (isGustavo) updatedFields.assignedTo = 'Gustavo';
+
     // Otimista
     const prevLeads = { ...leads };
-    setLeads(prev => ({ ...prev, [id]: { ...prev[id], ...updates } }));
+    setLeads(prev => ({ ...prev, [id]: { ...prev[id], ...updatedFields } }));
 
     const payload = {};
-    if (updates.name !== undefined) payload.name = updates.name;
-    if (updates.phone !== undefined) payload.phone = updates.phone;
-    if (updates.property !== undefined) payload.property = updates.property;
-    if (updates.source !== undefined) payload.source = updates.source;
-    if (updates.priority !== undefined) payload.priority = updates.priority;
-    if (updates.assignedTo !== undefined) payload.assigned_to = updates.assignedTo || null;
-    if (updates.notes !== undefined) payload.notes = updates.notes;
-    if (updates.inFollowUp !== undefined) payload.in_follow_up = updates.inFollowUp;
-    if (updates.scheduledDate !== undefined) payload.scheduled_date = updates.scheduledDate;
-    if (updates.scheduledTime !== undefined) payload.scheduled_time = updates.scheduledTime;
-    if (updates.scheduledAction !== undefined) payload.scheduled_action = updates.scheduledAction;
+    if (updatedFields.name !== undefined) payload.name = updatedFields.name;
+    if (updatedFields.phone !== undefined) payload.phone = updatedFields.phone;
+    if (updatedFields.property !== undefined) payload.property = updatedFields.property;
+    if (updatedFields.source !== undefined) payload.source = updatedFields.source;
+    if (updatedFields.priority !== undefined) payload.priority = updatedFields.priority;
+    if (updatedFields.assignedTo !== undefined) payload.assigned_to = updatedFields.assignedTo || null;
+    if (updatedFields.notes !== undefined) payload.notes = updatedFields.notes;
+    if (updatedFields.inFollowUp !== undefined) payload.in_follow_up = updatedFields.inFollowUp;
+    if (updatedFields.scheduledDate !== undefined) payload.scheduled_date = updatedFields.scheduledDate;
+    if (updatedFields.scheduledTime !== undefined) payload.scheduled_time = updatedFields.scheduledTime;
+    if (updatedFields.scheduledAction !== undefined) payload.scheduled_action = updatedFields.scheduledAction;
     if (targetColumn) payload.stage_id = targetColumn;
 
     const { error } = await supabase

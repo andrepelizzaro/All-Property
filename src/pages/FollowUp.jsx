@@ -24,6 +24,13 @@ const FollowUp = () => {
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [noteText, setNoteText] = useState('');
 
+  const currentUserEmail = (localStorage.getItem('userEmail') || '').trim().toLowerCase();
+  const canDelete = [
+    'andre@allproperty.com',
+    'araujo@allproperty.com',
+    'jonata@allproperty.com',
+  ].includes(currentUserEmail);
+
   const selectedLead = selectedLeadId ? leads[selectedLeadId] : null;
 
   const filtered = followUpLeads.filter(l =>
@@ -197,9 +204,11 @@ const FollowUp = () => {
                   <button className="btn btn-outline btn-sm text-danger-btn" onClick={() => handleRemoveFromFollowUp(selectedLead.id)}>
                     <ArrowRightLeft size={14} /> Remover
                   </button>
-                  <button className="btn btn-outline btn-sm text-danger-btn" onClick={() => setShowDeleteConfirm(selectedLead.id)}>
-                    <Trash2 size={14} /> Excluir
-                  </button>
+                  {canDelete && (
+                    <button className="btn btn-outline btn-sm text-danger-btn" onClick={() => setShowDeleteConfirm(selectedLead.id)}>
+                      <Trash2 size={14} /> Excluir
+                    </button>
+                  )}
                 </div>
               </div>
 
