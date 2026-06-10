@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FolderSync, Clock, Home, Calendar as CalendarIcon, BarChart3, LogOut, Menu, X, Key } from 'lucide-react';
+import { LayoutDashboard, FolderSync, Clock, Home, Calendar as CalendarIcon, BarChart3, LogOut, Menu, X, Key, ClipboardList } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import './Layout.css';
 
@@ -18,6 +18,7 @@ const Layout = ({ children, onLogout }) => {
   const navItems = [
     { path: '/', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/leads', name: 'Funil de Leads', icon: <FolderSync size={20} /> },
+    { path: '/prospects', name: 'Fila de Prospecção', icon: <ClipboardList size={20} /> },
     { path: '/follow-up', name: 'Follow-Up', icon: <Clock size={20} /> },
     { path: '/properties', name: 'Imóveis', icon: <Home size={20} /> },
     { path: '/calendar', name: 'Agenda', icon: <CalendarIcon size={20} /> },

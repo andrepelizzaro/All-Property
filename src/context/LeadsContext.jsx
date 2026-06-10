@@ -52,6 +52,9 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
     };
 
     data.forEach(lead => {
+      // Exclui leads da fila de prospecção do Kanban
+      if (lead.stage_id === 'prospect') return;
+
       // Se for o Jorge ou Gustavo, exibe apenas leads atribuídas a eles
       if (isJorge && lead.assigned_to !== 'Jorge') return;
       if (isGustavo && lead.assigned_to !== 'Gustavo') return;
@@ -61,6 +64,7 @@ export const LeadsProvider = ({ children, userEmail = '' }) => {
         id: lead.id,
         name: lead.name,
         phone: lead.phone,
+        email: lead.email || '',
         property: lead.property,
         source: lead.source,
         broker: lead.broker,

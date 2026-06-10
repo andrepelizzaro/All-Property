@@ -1,0 +1,424 @@
+/* ===========================
+   Prospects - Fila de Prospecção
+   =========================== */
+
+.prospects-page {
+  padding: 0;
+  min-height: 100%;
+  position: relative;
+}
+
+/* Loading */
+.prospects-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+  color: var(--text-secondary, #aaa);
+}
+
+/* Toast Notification */
+.prospects-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  animation: slideInToast 0.3s ease;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+}
+.toast-success {
+  background: linear-gradient(135deg, #1a6b3a, #23a05a);
+  color: #fff;
+}
+.toast-error {
+  background: linear-gradient(135deg, #7b1a1a, #c0392b);
+  color: #fff;
+}
+@keyframes slideInToast {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header */
+.prospects-header {
+  margin-bottom: 24px;
+}
+.prospects-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #e8c97a, #f5a623);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 4px;
+}
+.prospects-header .text-secondary {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+
+/* Filters */
+.prospects-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 9px 14px;
+  flex: 1;
+  min-width: 220px;
+  color: rgba(255,255,255,0.5);
+  transition: border-color 0.2s;
+}
+.filter-search-wrapper:focus-within {
+  border-color: #e8c97a;
+}
+.filter-search-wrapper input {
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  flex: 1;
+}
+.filter-search-wrapper input::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+.filter-clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.4);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+.filter-clear-btn:hover { color: #fff; }
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 9px 14px;
+  color: rgba(255,255,255,0.5);
+}
+.filter-group select {
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.filter-group select option {
+  background: #1e1e2e;
+  color: #fff;
+}
+
+/* Stats chips */
+.prospects-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.stat-alto {
+  background: rgba(245, 166, 35, 0.15);
+  color: #f5a623;
+  border: 1px solid rgba(245,166,35,0.3);
+}
+.stat-medio {
+  background: rgba(82, 196, 108, 0.12);
+  color: #52c46c;
+  border: 1px solid rgba(82,196,108,0.25);
+}
+.stat-sem {
+  background: rgba(150,150,200,0.1);
+  color: rgba(200,200,255,0.7);
+  border: 1px solid rgba(150,150,200,0.2);
+}
+
+/* Empty state */
+.prospects-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 14px;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+}
+.prospects-empty h3 {
+  color: rgba(255,255,255,0.6);
+  font-size: 1.1rem;
+  margin: 0;
+}
+.prospects-empty p {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Table */
+.prospects-table-wrapper {
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+}
+.prospects-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.prospects-table thead tr {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.prospects-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+}
+.prospects-row {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.18s;
+}
+.prospects-row:hover {
+  background: rgba(255,255,255,0.04);
+}
+.prospects-row:last-child {
+  border-bottom: none;
+}
+.prospects-table td {
+  padding: 13px 16px;
+  vertical-align: middle;
+}
+
+/* Potential badge */
+.potential-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.potential-high {
+  background: rgba(245, 166, 35, 0.15);
+  color: #f5a623;
+  border: 1px solid rgba(245,166,35,0.3);
+}
+.potential-medium {
+  background: rgba(82, 196, 108, 0.12);
+  color: #52c46c;
+  border: 1px solid rgba(82,196,108,0.25);
+}
+
+/* Lead name */
+.lead-name-cell {
+  min-width: 160px;
+}
+.lead-name-text {
+  font-weight: 600;
+  color: #fff;
+  display: block;
+}
+.assigned-tag {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 3px;
+  display: block;
+}
+
+/* Phone */
+.phone-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: #52c46c;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.phone-btn:hover { opacity: 0.75; }
+
+/* Email */
+.email-cell { max-width: 200px; }
+.email-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #7fb3f5;
+  font-size: 12.5px;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+  transition: opacity 0.2s;
+}
+.email-link:hover { opacity: 0.75; }
+.no-data { color: rgba(255,255,255,0.2); }
+
+/* Assign select */
+.assign-cell { min-width: 160px; }
+.assign-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.assign-select {
+  appearance: none;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.7);
+  padding: 6px 28px 6px 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+  min-width: 130px;
+}
+.assign-select:hover, .assign-select:focus {
+  border-color: #e8c97a;
+  background: rgba(232,201,122,0.08);
+}
+.assign-select.has-value {
+  color: #e8c97a;
+  border-color: rgba(232,201,122,0.4);
+}
+.assign-select option {
+  background: #1e1e2e;
+  color: #fff;
+}
+.select-icon {
+  position: absolute;
+  right: 8px;
+  color: rgba(255,255,255,0.4);
+  pointer-events: none;
+}
+
+/* Date */
+.date-cell {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Actions */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.action-promote {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(82, 196, 108, 0.15);
+  border: 1px solid rgba(82,196,108,0.3);
+  color: #52c46c;
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.action-promote:hover:not(:disabled) {
+  background: rgba(82,196,108,0.28);
+  transform: translateY(-1px);
+}
+.action-promote:disabled { opacity: 0.5; cursor: wait; }
+
+.action-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(220, 53, 69, 0.12);
+  border: 1px solid rgba(220,53,69,0.25);
+  color: #e05c6b;
+  border-radius: 7px;
+  padding: 5px 9px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.action-delete:hover {
+  background: rgba(220,53,69,0.25);
+}
+
+.action-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(37,211,102,0.15);
+  border: 1px solid rgba(37,211,102,0.3);
+  color: #25d366;
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.action-whatsapp:hover {
+  background: rgba(37,211,102,0.25);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .prospects-filters {
+    flex-direction: column;
+  }
+  .filter-search-wrapper {
+    min-width: unset;
+    width: 100%;
+  }
+  .prospects-table th:nth-child(4),
+  .prospects-table td:nth-child(4) {
+    display: none;
+  }
+}

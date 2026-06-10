@@ -10,6 +10,7 @@ import FollowUp from './pages/FollowUp';
 import Properties from './pages/Properties';
 import Calendar from './pages/Calendar';
 import Analytics from './pages/Analytics';
+import Prospects from './pages/Prospects';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,6 +52,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/leads" element={<LeadsKanban />} />
+                    <Route path="/prospects" element={<Prospects userEmail={userEmail} />} />
                     <Route path="/follow-up" element={<FollowUp />} />
                     <Route path="/properties" element={<Properties />} />
                     <Route path="/calendar" element={<Calendar />} />
